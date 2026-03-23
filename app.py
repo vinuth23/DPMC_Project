@@ -18,7 +18,7 @@ app = Flask(__name__)
 #comment ersr
 
 OLLAMA_API = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "mistral"  # Free model, you can also use "llama2", "neural-chat"
+OLLAMA_MODEL = "mistral"  # Free model, you can also use "llama2", "neural-chats"
 
 def build_fields_list(fields_list):
     """Helper to format field list as string"""
