@@ -264,6 +264,11 @@ main {
     width: 100%;
 }
 
+.upload-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
 .file-name {
     color: #666;
     font-size: 13px;

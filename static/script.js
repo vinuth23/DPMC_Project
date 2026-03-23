@@ -30,17 +30,61 @@ generateBtn.addEventListener('click', handleGenerate);
 exportBtn.addEventListener('click', handleExport);
 resetBtn.addEventListener('click', handleReset);
 
-// Upload buttons (UI only for now)
+// Screenshot upload — extracts form fields via Ollama vision model
 if (uploadScreenshotsBtn && screenshotsInput) {
     uploadScreenshotsBtn.addEventListener('click', () => screenshotsInput.click());
-    screenshotsInput.addEventListener('change', () => {
+    screenshotsInput.addEventListener('change', async () => {
         if (!screenshotsFileName) return;
         const files = screenshotsInput.files;
         if (!files || files.length === 0) {
             screenshotsFileName.textContent = 'No screenshots selected';
             return;
         }
-        screenshotsFileName.textContent = `${files.length} screenshot(s) selected`;
+
+        screenshotsFileName.textContent = `Extracting fields from ${files.length} screenshot(s)...`;
+        uploadScreenshotsBtn.disabled = true;
+        hideError();
+
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('screenshots', files[i]);
+        }
+
+        try {
+            const response = await fetch('/extract-fields', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to extract fields from screenshots');
+            }
+
+            // Add extracted fields to customFields
+            let added = 0;
+            data.fields.forEach(field => {
+                const name = (field.name || '').trim();
+                if (!name) return;
+                customFields.push({
+                    id: Date.now() + Math.random(),
+                    type: field.type || 'text',
+                    name: name,
+                    is_data_field: false
+                });
+                added++;
+            });
+
+            renderFields();
+            screenshotsFileName.textContent = `Extracted ${added} field(s) from ${files.length} screenshot(s)`;
+
+        } catch (error) {
+            showError(error.message);
+            screenshotsFileName.textContent = 'Failed to process screenshots';
+        } finally {
+            uploadScreenshotsBtn.disabled = false;
+        }
     });
 }
 

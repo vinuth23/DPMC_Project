@@ -6,6 +6,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from io import BytesIO
 from dotenv import load_dotenv
+from PIL import Image
+import pytesseract
 
 load_dotenv()
 
@@ -19,6 +21,11 @@ app = Flask(__name__)
 
 OLLAMA_API = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "mistral"  # Free model, you can also use "llama2", "neural-chats"
+
+# Tesseract OCR path (Windows default install location)
+TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+if os.path.exists(TESSERACT_PATH):
+    pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
 
 def build_fields_list(fields_list):
     """Helper to format field list as string"""
@@ -461,6 +468,123 @@ def export():
         as_attachment=True,
         download_name='generated_test_cases.xlsx'
     )
+
+@app.route('/extract-fields', methods=['POST'])
+def extract_fields():
+    """Extract form fields from screenshot(s) using Tesseract OCR + Mistral"""
+    if 'screenshots' not in request.files:
+        return jsonify({'error': 'No screenshots uploaded'}), 400
+
+    files = request.files.getlist('screenshots')
+    if not files or all(f.filename == '' for f in files):
+        return jsonify({'error': 'No screenshots selected'}), 400
+
+    # Step 1: OCR all screenshots and combine text
+    all_ocr_text = []
+    for file in files:
+        if not file or not file.filename:
+            continue
+        try:
+            img = Image.open(file)
+            # Convert to grayscale for better OCR
+            img = img.convert('L')
+            ocr_text = pytesseract.image_to_string(img)
+            print(f"OCR from {file.filename}: {ocr_text[:300]}")
+            all_ocr_text.append(ocr_text)
+        except Exception as e:
+            print(f"OCR error on {file.filename}: {e}")
+            continue
+
+    combined_text = "\n".join(all_ocr_text).strip()
+    if not combined_text:
+        return jsonify({'error': 'Could not extract any text from screenshots. Make sure Tesseract is installed.'}), 500
+
+    # Step 2: Send OCR text to Mistral to identify form fields
+    prompt = f"""Below is text extracted via OCR from a screenshot of a form/screen in a software application.
+Identify all form fields, input boxes, dropdowns, and buttons from this text.
+
+For each element, output one line in this exact format:
+- FieldLabel: type
+
+Where type is one of: text, amount, button
+
+Use "text" for text inputs, dropdowns, date fields, search fields, code fields, name fields, IDs, descriptions.
+Use "amount" for numeric/currency/money/quantity fields.
+Use "button" for buttons (like Add, Delete, Submit, Save, Clear, Search).
+
+OCR TEXT:
+{combined_text}
+
+List ONLY the field labels and types, one per line. Do not explain anything."""
+
+    try:
+        response = requests.post(
+            OLLAMA_API,
+            json={
+                "model": OLLAMA_MODEL,
+                "prompt": prompt,
+                "stream": False,
+                "temperature": 0.3
+            },
+            timeout=60
+        )
+
+        if response.status_code != 200:
+            print(f"Mistral error: Status {response.status_code}")
+            return jsonify({'error': 'Failed to process OCR text with Mistral'}), 500
+
+        response_data = response.json()
+        response_text = response_data.get("response", "").strip()
+        print(f"Mistral field extraction response: {response_text[:500]}")
+
+        # Parse lines like "- Label: type" or "Label: type"
+        all_fields = []
+        for line in response_text.split('\n'):
+            line = line.strip().lstrip('-•*0123456789.').strip()
+            if ':' not in line:
+                continue
+            parts = line.rsplit(':', 1)
+            if len(parts) != 2:
+                continue
+            name = parts[0].strip().strip('"').strip("'")
+            raw_type = parts[1].strip().lower().strip('"').strip("'").rstrip('.')
+            if not name or len(name) > 80:
+                continue
+
+            if any(kw in raw_type for kw in ['button', 'btn']):
+                field_type = 'button'
+            elif any(kw in raw_type for kw in ['amount', 'number', 'numeric', 'currency', 'quantity']):
+                field_type = 'amount'
+            else:
+                field_type = 'text'
+
+            all_fields.append({'name': name, 'type': field_type})
+
+        print(f"Extracted {len(all_fields)} fields total")
+
+        if not all_fields:
+            return jsonify({'error': 'Could not identify form fields from the screenshot text.'}), 500
+
+        # Deduplicate fields by name (case-insensitive)
+        seen = set()
+        unique_fields = []
+        for f in all_fields:
+            key = f.get('name', '').strip().lower()
+            if key and key not in seen:
+                seen.add(key)
+                unique_fields.append(f)
+
+        return jsonify({
+            'success': True,
+            'fields': unique_fields
+        })
+
+    except requests.exceptions.ConnectionError:
+        return jsonify({'error': 'Cannot connect to Ollama. Make sure it is running!'}), 500
+    except Exception as e:
+        print(f"Error extracting fields: {e}")
+        return jsonify({'error': f'Error: {str(e)}'}), 500
+
 
 @app.route('/health', methods=['GET'])
 def health():
