@@ -150,7 +150,8 @@ Before returning, verify:
 ✓ Only used the {regular_text_count + data_text_count + amount_count} fields provided
 ✓ Did NOT invent, assume, or hallucinate additional fields"""
     else:
-        # Only requirement provided, no fields
+        # Only requirement provided, no fields (or all fields have empty names)
+        button_fields = [f for f in (custom_fields or []) if f.get('name') and f.get('type') == 'button']
         if not requirement_text.strip():
             # No requirement, but might have buttons
             if button_fields and any(button.get('name') for button in button_fields):
