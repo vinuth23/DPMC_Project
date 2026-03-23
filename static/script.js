@@ -294,23 +294,7 @@ function displayTestCases(testCases) {
 }
 
 function updateStats(testCases) {
-    const totalCount = testCases.length;
-    const positiveCount = testCases.filter(tc => 
-        tc.scenario && (tc.scenario.toLowerCase().includes('valid') || 
-                       tc.scenario.toLowerCase().includes('success') ||
-                       tc.scenario.toLowerCase().includes('positive'))
-    ).length;
-    const negativeCount = testCases.filter(tc => 
-        tc.scenario && (tc.scenario.toLowerCase().includes('invalid') || 
-                       tc.scenario.toLowerCase().includes('error') ||
-                       tc.scenario.toLowerCase().includes('negative') ||
-                       tc.scenario.toLowerCase().includes('missing') ||
-                       tc.scenario.toLowerCase().includes('unauthorized'))
-    ).length;
-    
-    document.getElementById('totalTestCases').textContent = totalCount;
-    document.getElementById('positiveCount').textContent = positiveCount;
-    document.getElementById('negativeCount').textContent = negativeCount;
+    document.getElementById('totalTestCases').textContent = testCases.length;
 }
 
 async function handleExport() {

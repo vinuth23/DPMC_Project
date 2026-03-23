@@ -226,7 +226,7 @@ MANDATORY REQUIREMENTS:
                 "stream": False,
                 "temperature": 0.7
             },
-            timeout=60
+            timeout=180
         )
         
         if response.status_code != 200:
@@ -526,7 +526,7 @@ List ONLY the field labels and types, one per line. Do not explain anything."""
                 "stream": False,
                 "temperature": 0.3
             },
-            timeout=60
+            timeout=180
         )
 
         if response.status_code != 200:
