@@ -432,9 +432,9 @@
       <div class="agenda-item"><div class="agenda-num">7</div>AI Prompt Engineering</div>
       <div class="agenda-item"><div class="agenda-num">8</div>Hallucination Prevention</div>
       <div class="agenda-item"><div class="agenda-num">9</div>Excel Export Format</div>
-      <div class="agenda-item"><div class="agenda-num">10</div>API Endpoints</div>
-      <div class="agenda-item"><div class="agenda-num">11</div>Limitations &amp; Future Work</div>
-      <div class="agenda-item"><div class="agenda-num">12</div>Q &amp; A</div>
+      <div class="agenda-item"><div class="agenda-num">10</div>API Endpoints</div>      <div class="agenda-item"><div class="agenda-num">11</div>Current Limitations</div>
+      <div class="agenda-item"><div class="agenda-num">12</div>Future Work &amp; Improvements</div>
+      <div class="agenda-item"><div class="agenda-num">13</div>Q &amp; A</div>
     </div>
   </div>
 
@@ -1243,48 +1243,115 @@ python app.py
       </div>
     </div>
   </div>
-
   <!-- ═══════════════════════════════════════════════════════════
-       SLIDE 20 — LIMITATIONS & FUTURE WORK
+       SLIDE 20 — CURRENT LIMITATIONS
   ═══════════════════════════════════════════════════════════════ -->
   <div class="slide theme-dark" id="slide-20">
     <div class="eyebrow">Section 11</div>
-    <h1 class="slide-title">Limitations &amp;<br><span>Future Work</span></h1>
-    <div class="cols-2" style="margin-top:32px;">
-      <div>
-        <h3 style="margin-bottom:16px; font-size:16px; opacity:0.7;">Current Limitations</h3>
-        <div class="info-card">
-          <ul>
-            <li>Requires Ollama running locally — no server-side AI yet</li>
-            <li style="margin-top:10px;">OCR quality degrades with low-resolution or heavily styled screenshots</li>
-            <li style="margin-top:10px;">Upload Requirement Document and Modification Excel features are UI-only placeholders (not wired to backend)</li>
-            <li style="margin-top:10px;">No user accounts, history, or saved test case sets</li>
-            <li style="margin-top:10px;">LLM response time (5–30s) varies by machine hardware</li>
-            <li style="margin-top:10px;"><code>debug=False</code> but runs on Flask development server — not production-hardened</li>
-          </ul>
-        </div>
+    <h1 class="slide-title">Current <span>Limitations</span></h1>
+    <div class="cols-2" style="margin-top:28px;">
+      <div class="info-card">
+        <span class="card-icon">🖥️</span>
+        <h3>Local Ollama Dependency</h3>
+        <p>The app requires Ollama to be installed and running on the <strong>user's own machine</strong>. There is no fallback — if Ollama is not running, the entire generation pipeline fails. This creates a hard barrier for non-technical users and cannot be used without a setup step.</p>
       </div>
-      <div>
-        <h3 style="margin-bottom:16px; font-size:16px; opacity:0.7;">Potential Improvements</h3>
-        <div class="info-card">
-          <ul>
-            <li>Wire up document upload (PDF/DOCX parsing) to auto-populate requirement text</li>
-            <li style="margin-top:10px;">Implement Modification Excel upload to update existing test cases</li>
-            <li style="margin-top:10px;">Add streaming support for LLM responses (real-time TC generation)</li>
-            <li style="margin-top:10px;">Editable test case cards (in-browser editing before export)</li>
-            <li style="margin-top:10px;">Support multiple LLM backends (OpenAI, Gemini, Claude) via config</li>
-            <li style="margin-top:10px;">Use a vision-capable model (LLaVA) directly on screenshots — skip OCR step</li>
-            <li style="margin-top:10px;">Deploy with Gunicorn + Nginx for production use</li>
-          </ul>
-        </div>
+      <div class="info-card">
+        <span class="card-icon">🔍</span>
+        <h3>OCR Quality is Unreliable</h3>
+        <p>Tesseract uses only <strong>grayscale conversion</strong> before OCR — no binarisation, deskewing, or upscaling. Low-resolution screenshots, stylised fonts, dark backgrounds, or overlapping UI elements cause missed or garbled field labels, leading to incorrect test case generation.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">🚧</span>
+        <h3>Incomplete Features (UI Placeholders)</h3>
+        <p>Two prominent UI options — <strong>Upload Requirement Document</strong> (PDF/DOCX) and <strong>Modification Excel Upload</strong> — are wired to file inputs but have <em>no backend handler</em>. They are purely visual and do nothing when used.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">⚡</span>
+        <h3>Performance &amp; Scalability</h3>
+        <p>LLM response time ranges from <strong>5 to 30+ seconds</strong> depending on machine specs. The app runs on Flask's <strong>single-threaded development server</strong> (<code>debug=False</code> but not Gunicorn/Nginx) — concurrent requests will queue or fail under load. No caching, no history, no saved sessions.</p>
+      </div>
+    </div>
+    <div class="highlight-box hb-red" style="margin-top:16px; font-size:14px;">
+      <strong>Root Cause:</strong> The project was built as a local proof-of-concept with speed prioritised over robustness. Each limitation above represents a deliberate architectural trade-off for simplicity.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SLIDE 21 — FUTURE WORK
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="slide theme-blue" id="slide-21">
+    <div class="eyebrow">Section 12</div>
+    <h1 class="slide-title">Future Work &amp;<br><span>Improvements</span></h1>
+    <div class="cols-3" style="margin-top:28px;">
+      <div class="info-card">
+        <span class="card-icon">📄</span>
+        <h3>Document Parsing</h3>
+        <p>Integrate <strong>PyMuPDF</strong> or <strong>python-docx</strong> to parse uploaded PDF/DOCX requirement documents and auto-populate the requirement text box — eliminating manual copy-paste from spec sheets entirely.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">👁️</span>
+        <h3>Vision-Capable LLM (LLaVA)</h3>
+        <p>Replace the Tesseract OCR → Mistral text pipeline with a single <strong>LLaVA</strong> (or Gemini Vision) call that reads the screenshot directly. This removes the OCR preprocessing bottleneck and handles stylised/dark UI layouts that Tesseract cannot.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">✏️</span>
+        <h3>In-Browser Editing</h3>
+        <p>Make generated test case cards <strong>directly editable</strong> in the browser — contenteditable fields for scenario and expected result — so QA engineers can refine AI output before downloading, without opening Excel first.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">⚙️</span>
+        <h3>Multi-Backend LLM Support</h3>
+        <p>Add a settings panel to switch between <strong>Ollama (local), OpenAI GPT-4o, Google Gemini, and Anthropic Claude</strong> via a config file or environment variable. This gives the tool flexibility for teams that already have cloud API access and want faster responses.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">📡</span>
+        <h3>Streaming Responses</h3>
+        <p>Use Ollama's <strong>streaming API</strong> (<code>"stream": true</code>) and Server-Sent Events on the frontend to display test cases as they are generated — eliminating the awkward 5–30s blank wait with a real-time progressive reveal.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">🔗</span>
+        <h3>JIRA / Azure DevOps Export</h3>
+        <p>Add a one-click <strong>push to JIRA</strong> (via REST API) or <strong>Azure DevOps Test Plans</strong> integration. This removes the current two-step workflow of downloading Excel and then manually importing it into the team's test management tool.</p>
       </div>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════
-       SLIDE 21 — SUMMARY
+       SLIDE 22 — FUTURE WORK (CONTINUED)
   ═══════════════════════════════════════════════════════════════ -->
-  <div class="slide theme-green" id="slide-21">
+  <div class="slide theme-dark" id="slide-22">
+    <div class="eyebrow">Section 12 — Continued</div>
+    <h1 class="slide-title">More <span>Future Improvements</span></h1>
+    <div class="cols-2" style="margin-top:28px;">
+      <div class="info-card">
+        <span class="card-icon">🧹</span>
+        <h3>Smarter OCR Preprocessing</h3>
+        <p>Before passing to Tesseract, apply <strong>adaptive binarisation (Otsu's method), deskewing, and 2× upscaling</strong> using OpenCV or Pillow. Research shows these steps alone improve Tesseract accuracy by 20–40% on low-contrast UI screenshots — directly reducing incorrect field extraction.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">🏷️</span>
+        <h3>Priority &amp; Severity Tagging</h3>
+        <p>Automatically assign <strong>P1/P2/P3 priority and High/Medium/Low severity</strong> labels to each generated test case using a secondary LLM classification call. This helps QA teams instantly identify which test cases to run first during regression cycles.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">🔁</span>
+        <h3>Modification Excel Upload</h3>
+        <p>Complete the already-present UI placeholder: accept an existing test case Excel file, detect which fields have been <strong>added, removed, or renamed</strong> since the last run, and regenerate only the affected test cases — enabling incremental updates without starting from scratch.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">🧠</span>
+        <h3>Fine-Tuned QA Model</h3>
+        <p>Create a <strong>LoRA fine-tune of Mistral</strong> trained exclusively on high-quality QA test cases from real software projects. A domain-specific model would need far less prompt engineering, produce fewer hallucinations, and generate more contextually accurate scenarios than the general-purpose base model.</p>
+      </div>
+    </div>
+    <div class="highlight-box hb-blue" style="margin-top:16px; font-size:14px;">
+      <strong>Production Deployment:</strong> Containerise with <strong>Docker</strong>, serve Flask via <strong>Gunicorn</strong>, reverse-proxy with <strong>Nginx</strong>, and host Ollama on a shared GPU machine — making the tool accessible to the entire QA team without individual setup.
+    </div>
+  </div>
+  <!-- ═══════════════════════════════════════════════════════════
+       SLIDE 23 — SUMMARY
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="slide theme-green" id="slide-23">
     <div class="eyebrow">Summary</div>
     <h1 class="slide-title">What Was Built</h1>
     <div class="cols-3" style="margin-top:32px;">
@@ -1308,11 +1375,10 @@ python app.py
       The project demonstrates how a small, purpose-built local AI application can eliminate a significant chunk of repetitive QA work — with <strong>zero cloud dependency</strong> and a clean, intuitive UI.
     </div>
   </div>
-
   <!-- ═══════════════════════════════════════════════════════════
-       SLIDE 22 — Q&A
+       SLIDE 24 — Q&A
   ═══════════════════════════════════════════════════════════════ -->
-  <div class="slide theme-dark" id="slide-22">
+  <div class="slide theme-dark" id="slide-24">
     <div class="eyebrow">Thank you</div>
     <h1 class="slide-title" style="font-size:clamp(48px,7vw,96px);">Q &amp; A</h1>
     <p class="slide-sub" style="margin-top:20px;">
@@ -1340,7 +1406,7 @@ python app.py
 <div class="progress-bar" id="progressBar"></div>
 
 <!-- Slide counter -->
-<div class="slide-counter" id="slideCounter">1 / 22</div>
+<div class="slide-counter" id="slideCounter">1 / 24</div>
 
 <!-- Navigation -->
 <div class="nav">
