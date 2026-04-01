@@ -1251,9 +1251,14 @@ python app.py
     <h1 class="slide-title">Current <span>Limitations</span></h1>
     <div class="cols-2" style="margin-top:28px;">
       <div class="info-card">
-        <span class="card-icon">🖥️</span>
-        <h3>Local Ollama Dependency</h3>
-        <p>The app requires Ollama to be installed and running on the <strong>user's own machine</strong>. There is no fallback — if Ollama is not running, the entire generation pipeline fails. This creates a hard barrier for non-technical users and cannot be used without a setup step.</p>
+        <span class="card-icon">�</span>
+        <h3>Powerful Models Cannot Run on Company Laptops</h3>
+        <p>Company-issued laptops lack the <strong>GPU memory and compute</strong> required to run large, capable language models locally. The tool is therefore limited to smaller models like <strong>Mistral 7B</strong> — which, while functional, produce noticeably weaker and less nuanced test cases compared to frontier models.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">☁️</span>
+        <h3>Cloud-Based AI Is Not Viable Due to Cost</h3>
+        <p>Powerful cloud models such as <strong>GPT-4o or Claude 3.5</strong> would significantly improve output quality, but their <strong>API costs are prohibitive</strong> for internal tooling at scale. Without a budget allocation or enterprise agreement, the project cannot leverage the AI models that would make it most effective.</p>
       </div>
       <div class="info-card">
         <span class="card-icon">🔍</span>
@@ -1261,18 +1266,13 @@ python app.py
         <p>Tesseract uses only <strong>grayscale conversion</strong> before OCR — no binarisation, deskewing, or upscaling. Low-resolution screenshots, stylised fonts, dark backgrounds, or overlapping UI elements cause missed or garbled field labels, leading to incorrect test case generation.</p>
       </div>
       <div class="info-card">
-        <span class="card-icon">🚧</span>
-        <h3>Incomplete Features (UI Placeholders)</h3>
-        <p>Two prominent UI options — <strong>Upload Requirement Document</strong> (PDF/DOCX) and <strong>Modification Excel Upload</strong> — are wired to file inputs but have <em>no backend handler</em>. They are purely visual and do nothing when used.</p>
-      </div>
-      <div class="info-card">
-        <span class="card-icon">⚡</span>
-        <h3>Performance &amp; Scalability</h3>
-        <p>LLM response time ranges from <strong>5 to 30+ seconds</strong> depending on machine specs. The app runs on Flask's <strong>single-threaded development server</strong> (<code>debug=False</code> but not Gunicorn/Nginx) — concurrent requests will queue or fail under load. No caching, no history, no saved sessions.</p>
+        <span class="card-icon">⚠️</span>
+        <h3>Manual Review Is Always Required</h3>
+        <p>Because the tool is forced to use <strong>weak local models</strong> (hardware barrier), cannot access <strong>powerful cloud models</strong> (cost barrier), and relies on <strong>error-prone OCR</strong> for screenshot input, the accuracy of generated test cases cannot be guaranteed. Every output must be carefully reviewed and corrected by a QA engineer before use.</p>
       </div>
     </div>
     <div class="highlight-box hb-red" style="margin-top:16px; font-size:14px;">
-      <strong>Root Cause:</strong> The project was built as a local proof-of-concept with speed prioritised over robustness. Each limitation above represents a deliberate architectural trade-off for simplicity.
+      <strong>Core Constraint:</strong> The tool's effectiveness is directly bottlenecked by model quality. Until hardware or budget constraints are resolved, the AI will remain underpowered relative to the task — making human oversight non-negotiable.
     </div>
   </div>
 
@@ -1282,36 +1282,26 @@ python app.py
   <div class="slide theme-blue" id="slide-21">
     <div class="eyebrow">Section 12</div>
     <h1 class="slide-title">Future Work &amp;<br><span>Improvements</span></h1>
-    <div class="cols-3" style="margin-top:28px;">
+    <div class="cols-2" style="margin-top:28px;">
       <div class="info-card">
-        <span class="card-icon">📄</span>
-        <h3>Document Parsing</h3>
-        <p>Integrate <strong>PyMuPDF</strong> or <strong>python-docx</strong> to parse uploaded PDF/DOCX requirement documents and auto-populate the requirement text box — eliminating manual copy-paste from spec sheets entirely.</p>
+        <span class="card-icon">☁️</span>
+        <h3>Affordable Cloud API — Bypass Laptop Limits</h3>
+        <p><em>Addresses: hardware constraint &amp; cost barrier.</em><br>Integrate <strong>Groq API</strong> (free tier, extremely fast inference) or leverage an existing <strong>Azure OpenAI</strong> enterprise agreement the company may already hold. The AI runs on the provider's hardware — no GPU needed on any employee laptop — and individual test-case generations cost fractions of a cent, making it manageable even on a small internal budget.</p>
       </div>
       <div class="info-card">
         <span class="card-icon">👁️</span>
         <h3>Vision-Capable LLM (LLaVA)</h3>
-        <p>Replace the Tesseract OCR → Mistral text pipeline with a single <strong>LLaVA</strong> (or Gemini Vision) call that reads the screenshot directly. This removes the OCR preprocessing bottleneck and handles stylised/dark UI layouts that Tesseract cannot.</p>
+        <p><em>Addresses: unreliable OCR.</em><br>Replace the Tesseract OCR → Mistral text pipeline with a single <strong>LLaVA</strong> multimodal model call that reads the screenshot directly. No preprocessing, no garbled text — the model sees the UI exactly as the QA engineer does. LLaVA 1.6 7B can run on the same shared server, keeping the solution fully internal if needed.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">🖥️</span>
+        <h3>Shared Internal Server Deployment</h3>
+        <p><em>Addresses: hardware constraint on individual laptops.</em><br>Host Ollama and the LLM on a <strong>single shared team machine</strong> (even a mid-range workstation with an 8 GB GPU is sufficient for Mistral 7B). QA engineers access the tool via browser over the local network — no individual setup, no laptop GPU requirement, and the entire team shares one inference engine.</p>
       </div>
       <div class="info-card">
         <span class="card-icon">✏️</span>
-        <h3>In-Browser Editing</h3>
-        <p>Make generated test case cards <strong>directly editable</strong> in the browser — contenteditable fields for scenario and expected result — so QA engineers can refine AI output before downloading, without opening Excel first.</p>
-      </div>
-      <div class="info-card">
-        <span class="card-icon">⚙️</span>
-        <h3>Multi-Backend LLM Support</h3>
-        <p>Add a settings panel to switch between <strong>Ollama (local), OpenAI GPT-4o, Google Gemini, and Anthropic Claude</strong> via a config file or environment variable. This gives the tool flexibility for teams that already have cloud API access and want faster responses.</p>
-      </div>
-      <div class="info-card">
-        <span class="card-icon">📡</span>
-        <h3>Streaming Responses</h3>
-        <p>Use Ollama's <strong>streaming API</strong> (<code>"stream": true</code>) and Server-Sent Events on the frontend to display test cases as they are generated — eliminating the awkward 5–30s blank wait with a real-time progressive reveal.</p>
-      </div>
-      <div class="info-card">
-        <span class="card-icon">🔗</span>
-        <h3>JIRA / Azure DevOps Export</h3>
-        <p>Add a one-click <strong>push to JIRA</strong> (via REST API) or <strong>Azure DevOps Test Plans</strong> integration. This removes the current two-step workflow of downloading Excel and then manually importing it into the team's test management tool.</p>
+        <h3>In-Browser Review &amp; Edit Workflow</h3>
+        <p><em>Addresses: mandatory manual review overhead.</em><br>Make generated test case cards <strong>directly editable in the browser</strong> — inline fields for scenario and expected result — so QA engineers can review and correct AI output in one structured step before downloading. Reduces the back-and-forth between the tool and Excel during the unavoidable review phase.</p>
       </div>
     </div>
   </div>
@@ -1321,31 +1311,31 @@ python app.py
   ═══════════════════════════════════════════════════════════════ -->
   <div class="slide theme-dark" id="slide-22">
     <div class="eyebrow">Section 12 — Continued</div>
-    <h1 class="slide-title">More <span>Future Improvements</span></h1>
+    <h1 class="slide-title">Further <span>Enhancements</span></h1>
     <div class="cols-2" style="margin-top:28px;">
       <div class="info-card">
         <span class="card-icon">🧹</span>
-        <h3>Smarter OCR Preprocessing</h3>
-        <p>Before passing to Tesseract, apply <strong>adaptive binarisation (Otsu's method), deskewing, and 2× upscaling</strong> using OpenCV or Pillow. Research shows these steps alone improve Tesseract accuracy by 20–40% on low-contrast UI screenshots — directly reducing incorrect field extraction.</p>
-      </div>
-      <div class="info-card">
-        <span class="card-icon">🏷️</span>
-        <h3>Priority &amp; Severity Tagging</h3>
-        <p>Automatically assign <strong>P1/P2/P3 priority and High/Medium/Low severity</strong> labels to each generated test case using a secondary LLM classification call. This helps QA teams instantly identify which test cases to run first during regression cycles.</p>
+        <h3>Smarter OCR Preprocessing (Short-Term Fix)</h3>
+        <p>While transitioning to LLaVA, improve the existing Tesseract pipeline immediately by adding <strong>adaptive binarisation (Otsu's method), deskewing, and 2× upscaling</strong> via OpenCV. This is a low-effort, zero-cost change that can improve OCR accuracy by 20–40% on typical UI screenshots without any model changes.</p>
       </div>
       <div class="info-card">
         <span class="card-icon">🔁</span>
         <h3>Modification Excel Upload</h3>
-        <p>Complete the already-present UI placeholder: accept an existing test case Excel file, detect which fields have been <strong>added, removed, or renamed</strong> since the last run, and regenerate only the affected test cases — enabling incremental updates without starting from scratch.</p>
+        <p>Complete the already-present UI placeholder: accept an existing test case Excel file, detect which fields have been <strong>added, removed, or renamed</strong> since the last run, and regenerate only the affected test cases — enabling incremental updates without regenerating everything from scratch each sprint.</p>
       </div>
       <div class="info-card">
-        <span class="card-icon">🧠</span>
-        <h3>Fine-Tuned QA Model</h3>
-        <p>Create a <strong>LoRA fine-tune of Mistral</strong> trained exclusively on high-quality QA test cases from real software projects. A domain-specific model would need far less prompt engineering, produce fewer hallucinations, and generate more contextually accurate scenarios than the general-purpose base model.</p>
+        <span class="card-icon">🏷️</span>
+        <h3>Priority &amp; Severity Tagging</h3>
+        <p>Automatically assign <strong>P1/P2/P3 priority and High/Medium/Low severity</strong> labels to each generated test case. This helps QA teams instantly identify which test cases to execute first during regression cycles, reducing the triage effort that is currently done manually in Excel.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-icon">📄</span>
+        <h3>Document Parsing (PDF / DOCX)</h3>
+        <p>Integrate <strong>PyMuPDF</strong> or <strong>python-docx</strong> to parse uploaded requirement documents and auto-populate the requirement text box. This eliminates the manual copy-paste step from spec sheets and is a straightforward backend addition using libraries already compatible with the existing Flask setup.</p>
       </div>
     </div>
     <div class="highlight-box hb-blue" style="margin-top:16px; font-size:14px;">
-      <strong>Production Deployment:</strong> Containerise with <strong>Docker</strong>, serve Flask via <strong>Gunicorn</strong>, reverse-proxy with <strong>Nginx</strong>, and host Ollama on a shared GPU machine — making the tool accessible to the entire QA team without individual setup.
+      <strong>Deployment Path:</strong> Containerise with <strong>Docker</strong> and serve via <strong>Gunicorn + Nginx</strong> on the shared internal server — making the tool a stable, always-on resource for the whole QA team, not a per-laptop install.
     </div>
   </div>
   <!-- ═══════════════════════════════════════════════════════════
