@@ -8,6 +8,8 @@ from io import BytesIO
 from dotenv import load_dotenv
 from PIL import Image
 import pytesseract
+import PyPDF2
+import docx
 
 load_dotenv()
 
@@ -261,21 +263,24 @@ MANDATORY REQUIREMENTS:
             
             # FILTER: Remove any test cases that reference fields NOT in our provided list
             # This prevents Ollama from hallucinating fields that don't exist
+            # Only apply filter when custom fields were provided
             all_provided_fields = [f.get('name', '').lower() for f in custom_fields if f.get('name')]
-            filtered_test_cases = []
             
-            for tc in test_cases:
-                scenario = tc.get('scenario', '').lower()
-                # Check if this test case references any of our provided fields
-                references_valid_field = any(field_name in scenario for field_name in all_provided_fields)
+            if all_provided_fields:
+                filtered_test_cases = []
                 
-                if references_valid_field:
-                    filtered_test_cases.append(tc)
-                else:
-                    print(f"FILTERED OUT (hallucinated field): {tc.get('scenario', '')[:60]}")
-            
-            test_cases = filtered_test_cases
-            print(f"After filtering hallucinated fields: {len(test_cases)} test cases")
+                for tc in test_cases:
+                    scenario = tc.get('scenario', '').lower()
+                    # Check if this test case references any of our provided fields
+                    references_valid_field = any(field_name in scenario for field_name in all_provided_fields)
+                    
+                    if references_valid_field:
+                        filtered_test_cases.append(tc)
+                    else:
+                        print(f"FILTERED OUT (hallucinated field): {tc.get('scenario', '')[:60]}")
+                
+                test_cases = filtered_test_cases
+                print(f"After filtering hallucinated fields: {len(test_cases)} test cases")
             
             # INSERT SPELLING/GRAMMAR TEST CASE AS FIRST TEST CASE
             spelling_test_case = {
@@ -292,6 +297,7 @@ MANDATORY REQUIREMENTS:
             print(f"Added spelling/grammar test case at beginning")
             
             # Generate button test cases
+            button_fields = [f for f in custom_fields if f.get('name') and f.get('type') == 'button'] if custom_fields else []
             if button_fields and any(button.get('name') for button in button_fields):
                 button_test_cases = []
                 for i, button in enumerate(button_fields):
@@ -584,6 +590,55 @@ List ONLY the field labels and types, one per line. Do not explain anything."""
     except Exception as e:
         print(f"Error extracting fields: {e}")
         return jsonify({'error': f'Error: {str(e)}'}), 500
+
+
+@app.route('/upload-requirement', methods=['POST'])
+def upload_requirement():
+    """Extract text from uploaded requirement document (PDF, DOCX, TXT)"""
+    if 'document' not in request.files:
+        return jsonify({'error': 'No document uploaded'}), 400
+
+    file = request.files['document']
+    if not file or not file.filename:
+        return jsonify({'error': 'No file selected'}), 400
+
+    filename = file.filename.lower()
+    extracted_text = ''
+
+    try:
+        if filename.endswith('.pdf'):
+            reader = PyPDF2.PdfReader(file)
+            pages_text = []
+            for page in reader.pages:
+                text = page.extract_text()
+                if text:
+                    pages_text.append(text)
+            extracted_text = '\n'.join(pages_text)
+
+        elif filename.endswith('.docx'):
+            doc = docx.Document(file)
+            paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+            extracted_text = '\n'.join(paragraphs)
+
+        elif filename.endswith('.txt'):
+            extracted_text = file.read().decode('utf-8', errors='ignore')
+
+        else:
+            return jsonify({'error': 'Unsupported file type. Please upload PDF, DOCX, or TXT.'}), 400
+
+        extracted_text = extracted_text.strip()
+        if not extracted_text:
+            return jsonify({'error': 'Could not extract any text from the document.'}), 400
+
+        print(f"Extracted {len(extracted_text)} characters from {file.filename}")
+        return jsonify({
+            'success': True,
+            'text': extracted_text
+        })
+
+    except Exception as e:
+        print(f"Error extracting text from document: {e}")
+        return jsonify({'error': f'Failed to read document: {str(e)}'}), 500
 
 
 @app.route('/health', methods=['GET'])

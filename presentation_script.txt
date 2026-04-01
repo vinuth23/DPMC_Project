@@ -1,0 +1,496 @@
+╔══════════════════════════════════════════════════════════════════╗
+║   AI-ASSISTED TEST CASE GENERATOR — PRESENTATION SCRIPT         ║
+║   Total Duration: ~30 minutes  |  16 Slides                     ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Timing guide per slide is shown as [~X min]. Adjust based on live demo pace.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 1 — TITLE  [~1 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"Good [morning/afternoon], everyone. Today I'm going to be presenting
+a project I've been working on called the AI-Assisted Test Case
+Generator.
+
+In a nutshell, it's a web application that takes the pain out of
+writing QA test cases. Instead of manually writing test cases for
+every single field in a form, this tool does it for you — using an
+AI model running entirely on your local machine.
+
+The stack here is Flask on the backend, Vanilla JavaScript on the
+frontend, Tesseract for OCR, and Ollama running Mistral as the LLM.
+No cloud, no API keys, no cost.
+
+Let me walk you through how it all works."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 2 — AGENDA  [~1 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"Here's our agenda for today.
+
+I'll start by explaining the problem this tool solves, then walk
+through how the system is built — the tech stack, the architecture,
+and how the AI works under the hood.
+
+I'll also do a quick demo to show the tool in action, and then cover
+the current limitations honestly, and where I see this going in the
+future.
+
+We'll have time for questions at the end, so feel free to hold any
+queries until then."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 3 — PROBLEM STATEMENT  [~2 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"So, what problem are we solving?
+
+If you've ever been a QA engineer — or worked closely with one — you
+know how repetitive test case writing can be. Every time a new form
+is built, someone has to sit down and write test cases for every
+single field. 'Verify the input limit', 'verify the save works',
+'verify the required field shows an error' — again and again for
+every project.
+
+This is slow. It's tedious. And honestly, it's the kind of work that
+people rush through, which means coverage gets inconsistent. One
+tester might remember to check the grammar of the form, another might
+not. Some fields get missed entirely.
+
+On top of that, switching between the requirements document, the form
+itself, and the spreadsheet is constant context switching — and that's
+where mistakes happen.
+
+Now, you might say — 'why not just use ChatGPT or Gemini to help?'
+And the answer is: cost and data privacy. Cloud AI tools charge per
+token, and we're not comfortable sending internal business requirement
+documents to an external API.
+
+That's the exact gap this project fills."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 4 — PROJECT OVERVIEW & GOALS  [~2 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"The goal of this project was simple: build a tool that a QA engineer
+can use to go from a form — whether that's a screenshot or just a
+list of field names — to a fully-formatted, downloadable Excel test
+case sheet in under 60 seconds.
+
+Three things were non-negotiable in the design:
+
+First, it had to be local-first. Everything runs on Ollama using the
+Mistral model — on your own machine. No data leaves your environment.
+Zero cloud costs.
+
+Second, the output had to be structured. Not just a paragraph of
+text — actual test cases with a TC ID, a scenario description, and an
+expected result. Ready to paste into the team's QA spreadsheet.
+
+And third, it needed to support screenshot input. Not every QA
+engineer wants to manually type 20 field names. If they have a
+screenshot of the form, the tool should be able to read it."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 5 — TECH STACK  [~2 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"Let me quickly run through the tech stack, by layer.
+
+The frontend is intentionally simple — plain HTML, CSS, and Vanilla
+JavaScript. No React, no heavy framework. This was a deliberate
+choice to keep the project lightweight and easy to maintain. The
+browser's Fetch API handles all the communication with the backend.
+
+The backend is Python with Flask. Flask was chosen because it's
+minimal, easy to set up, and handles everything we need — serving the
+page, processing API requests, and streaming the Excel file back to
+the browser.
+
+For the AI layer, we're using Ollama — which is a local LLM server —
+running the Mistral 7B model. Ollama exposes a REST API on port 11434,
+and Flask just sends HTTP requests to it. This is what keeps the
+entire thing private and free.
+
+For OCR, we're using Tesseract via the pytesseract Python wrapper, and
+Pillow for image preprocessing.
+
+And for the Excel output, we use openpyxl to build the spreadsheet
+entirely in memory — no temp files — and Flask streams it directly to
+the browser."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 6 — SYSTEM ARCHITECTURE  [~2 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"Here's the architecture at a high level. There are two main paths
+into the system.
+
+Path one: the user uploads a screenshot. Tesseract extracts the raw
+text from the image, then Mistral analyses that text and identifies
+the field names and their types. Those get auto-populated into the
+field list on the UI.
+
+Path two: the user types field names manually, optionally adds some
+requirement text describing the feature, and hits Generate.
+
+In both cases, the field list eventually gets sent to Mistral for
+test case generation. Mistral returns structured JSON, the backend
+processes and validates it, injects the mandatory test cases — like
+the grammar check and the save validation tests — and sends everything
+back to the browser.
+
+The user reviews the cards, clicks Download, and gets a formatted
+Excel file.
+
+And I want to emphasise — everything on this diagram runs on
+localhost. The Ollama server is at port 11434. Nothing goes out to
+the internet."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 7 — FIELD TYPES & THEIR RULES  [~2.5 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"Now let's talk about one of the core design decisions — how the tool
+handles different field types, because this is what drives how many
+test cases get generated.
+
+There are four field types.
+
+A regular Text Field generates one test case. Things like a name
+field, a dropdown, a date picker. The test case verifies the input
+limit and checks whether the value can be saved.
+
+A Data Field is a special type of text field. This is for fields like
+'Customer ID' or 'Policy Number' — fields where entering a valid value
+causes other fields in the form to automatically populate. These
+generate three test cases: one for a valid entry, one for an invalid
+entry, and one that checks whether the downstream fields actually
+load correctly.
+
+An Amount Field is for numeric, monetary, or quantity inputs. These
+generate two test cases: one confirming valid numbers are accepted,
+and one verifying that negative or zero values are rejected.
+
+Finally, Button fields generate one test case each — verifying the
+button does what it's supposed to do without errors. These are
+generated deterministically in Python, without any LLM involvement,
+because the logic is straightforward.
+
+So depending on your field mix, the total test case count is
+calculated before the prompt is even sent to the model."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 8 — SCREENSHOT OCR PIPELINE  [~2.5 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"Let me walk through the screenshot pipeline in detail, because it's
+one of the more interesting parts of the system.
+
+When the user uploads a screenshot, the first thing we do is convert
+it to grayscale using Pillow. This is a simple but effective
+preprocessing step that improves OCR accuracy on most UIs.
+
+Then Tesseract runs on the grayscale image and extracts all the text
+it can find. If there are multiple screenshots, we do this for each
+one and combine all the text into a single block.
+
+That combined text then gets sent to Mistral with a prompt that says:
+look at this text, which parts are form field labels, and what type
+are they — text, amount, or button?
+
+Mistral returns a structured list in the format 'Label: type'. We
+parse that, apply deduplication — case-insensitive — and discard
+any field names longer than 80 characters, which are usually garbage
+text that Tesseract picked up from somewhere else in the screenshot.
+
+The resulting clean list of fields auto-populates the field input
+section on the UI. The user can then review, adjust any types if
+needed — for example, mark certain fields as Data Fields — and
+then generate.
+
+One technical detail worth noting: we use a low temperature of 0.3
+for this OCR-analysis step. We want deterministic, consistent output
+here — not creative writing."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 9 — AI PROMPT ENGINEERING  [~2.5 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"A lot of the reliability of this system comes down to how the prompt
+is structured. This was honestly the most iterative part of the
+build.
+
+The prompt isn't just 'here are my fields, write some test cases.'
+It's very precisely engineered to get predictable, countable output
+from a 7B model.
+
+The prompt has four key sections.
+
+First, a Field Inventory — an explicit, itemised list of every field
+by type, with the number of test cases each one should produce. So
+Mistral knows: I have 2 text fields, that's 2 TCs, I have 1 data
+field, that's 3 TCs, and so on.
+
+Second, the total expected count. The prompt literally says 'TOTAL
+EXPECTED TEST CASES: 7 — MUST be exactly 7.' This is calculated in
+Python before the prompt is built, and it acts as a constraint. It
+stops the model from under-generating or hallucinating extras.
+
+Third, generation rules — per field type, word-for-word templates
+for what the test case scenario should look like.
+
+And fourth, the output format instruction — return ONLY valid JSON,
+no markdown fences, no extra commentary. Just the JSON object.
+
+The temperature for this generation step is set to 0.7 — slightly
+higher than the OCR step — to allow the model to write varied,
+natural language scenarios rather than repeating identical phrasing
+every time."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 10 — HALLUCINATION PREVENTION  [~2 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"One of the risks with any LLM-powered system is hallucination — the
+model inventing information that wasn't in the input. In our case
+that would look like Mistral writing a test case for a 'Date of Birth'
+field that the user never actually defined.
+
+We have two layers of defence against this.
+
+Layer 1 is in the prompt itself. There's a strongly-worded warning
+that says, in capital letters: 'CRITICAL — ONLY use the fields
+provided below. Do NOT make up, assume, or hallucinate any fields.'
+Combined with the explicit field inventory, this significantly reduces
+the chance of invention.
+
+But we don't just trust the prompt. Layer 2 is a post-generation
+filter in Python. After Mistral returns the test cases, the backend
+scans every single test case scenario. It checks: does this test case
+mention at least one of the actual field names the user provided? If
+not, it gets discarded before the response ever reaches the frontend.
+
+So even if Mistral goes rogue and adds something unexpected, the
+filter catches it. This two-layer approach — prompt guardrails plus
+runtime filtering — is what makes the output trustworthy."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 11 — EXCEL EXPORT FORMAT  [~1.5 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"When the user downloads the output, they get a formatted Excel file
+that matches the standard QA test case template the team already uses.
+
+It has seven columns. The tool auto-fills columns C, D, and E — the
+Test Case ID, the test case scenario, and the expected result. The
+remaining columns — Scenario ID, Scenario grouping, Actual Result,
+and Comments — are left empty for the QA engineer to fill in during
+actual test execution.
+
+The headers are styled with a dark blue fill and bold white text,
+matching corporate standards. All cells have borders and word wrap
+enabled.
+
+One technical point: the Excel file is built entirely in memory using
+Python's BytesIO — no temporary files are written to disk. Flask then
+streams it directly to the browser as a download. Clean and fast."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 12 — DEMO WALKTHROUGH  [~3 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[NOTE: If doing a live demo, switch to the browser now. If not, talk
+through both scenarios using the slide.]
+
+"Let me show you a demo — or walk you through exactly what a demo
+would look like.
+
+We have two scenarios.
+
+Scenario A — the field-based flow:
+I'll add four fields. First, 'Customer ID' as a Text field with the
+Data Field checkbox ticked — because entering a Customer ID populates
+other fields. Then 'Customer Name' as a plain Text field. Then
+'Loan Amount' as an Amount field. And finally a 'Submit' button.
+
+Based on the rules we just covered, the expected count is:
+- 1 grammar TC (always first)
+- 3 TCs for Customer ID (data field)
+- 1 TC for Customer Name (text field)
+- 2 TCs for Loan Amount (amount field)
+- 1 TC for Submit (button)
+- 3 save validation TCs (always last)
+That's 11 test cases total.
+
+I hit Generate, wait about 5 to 15 seconds for Ollama, and the cards
+appear on screen. I can review them, and then click Download as Excel.
+
+Scenario B — the screenshot flow:
+I upload a screenshot of a form. Tesseract reads it, Mistral
+identifies the fields, and they auto-populate. I review, adjust any
+types — mark a Data Field if needed — optionally add some requirement
+context, and generate.
+
+Both scenarios end the same way: a formatted Excel file ready to drop
+into the test management system."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 13 — CURRENT LIMITATIONS  [~2.5 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"Now I want to be honest about where the tool falls short, because
+understanding the limitations is just as important as celebrating what
+works.
+
+There are four key limitations, and they're all connected.
+
+The first is a hardware problem. Powerful AI models — the ones that
+would produce really high-quality, nuanced test cases — require
+significant GPU memory to run locally. Company laptops simply can't
+run them. So we're limited to Mistral 7B, which is functional, but
+it's not on the same level as frontier models.
+
+The second is cost. The obvious solution would be to use a cloud model
+like GPT-4o or Claude 3.5. These models would dramatically improve
+output quality. But the API costs are prohibitive for internal tooling
+without a dedicated budget or an existing enterprise agreement in place.
+
+The third is OCR quality. Tesseract works reasonably well on clean,
+high-contrast screenshots, but it struggles with dark themes, stylised
+fonts, and low-resolution images. When Tesseract gets the field labels
+wrong, the test cases come out wrong.
+
+And this leads to the fourth limitation, which is the consequence of
+all three: manual review is always required. Because we're working
+with a smaller model, without cloud access, and with imperfect OCR,
+we cannot guarantee the accuracy of every generated test case. A QA
+engineer must always review and validate the output before using it.
+
+The tool speeds up the work significantly — but it doesn't eliminate
+the need for human judgement."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 14 — FUTURE WORK & IMPROVEMENTS  [~2.5 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"Each of those limitations points directly to a future improvement.
+
+The most impactful one would be replacing the Tesseract OCR pipeline
+with a vision-capable LLM like LLaVA. Instead of extracting raw text
+and then asking Mistral to interpret it, LLaVA can look at the
+screenshot directly and understand the UI as a visual object. Dark
+themes, overlapping elements, stylised fonts — none of that matters
+when the model is reading the image natively. This would eliminate the
+OCR bottleneck entirely.
+
+The second improvement is smarter OCR preprocessing — this is the
+short-term fix while we work toward LLaVA. Adding adaptive
+binarisation and deskewing using OpenCV before passing images to
+Tesseract can boost accuracy by 20 to 40 percent at zero cost. It's
+low effort, no architectural change, and would make the current
+pipeline meaningfully better almost immediately.
+
+Third is Modification Excel Upload. There's already a placeholder for
+this in the UI — it just doesn't have a backend yet. The idea is that
+if a QA engineer has already generated test cases for a form, and then
+the form gets updated — a field renamed, a field added — they
+shouldn't have to start from scratch. They upload the old Excel file,
+the system detects what changed, and regenerates only the affected
+test cases.
+
+And fourth — User Profiles and History. Right now the tool is
+stateless. Every session starts fresh. Adding user accounts would
+let QA engineers log in, see their past generations, re-download
+previous test case sets, and build up a persistent workspace over
+time."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 15 — SUMMARY  [~1 min]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"To summarise what was built:
+
+This is a hybrid system — it combines rule-based logic with LLM
+generation. The deterministic rules handle the mandatory test cases,
+the field counts, and the formatting. The AI handles the nuanced
+scenario writing. That combination is what makes the output both
+structured and intelligent.
+
+It's entirely private and free to run. No API keys, no subscription,
+no data leaving your machine.
+
+And end to end — from a screenshot or a few field names to a
+formatted Excel download — the whole process takes under a minute.
+
+I think this demonstrates that you don't need a large, expensive cloud
+AI product to meaningfully automate QA work. A focused, well-
+engineered local tool can save significant time in day-to-day testing."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 16 — Q & A  [remaining time]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"That's the full presentation. Thank you for listening.
+
+I'm happy to take any questions — whether that's about the technical
+implementation, the prompt engineering, the limitations, or anything
+else. If anyone wants to see the live demo or look at the code, I can
+do that as well."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SUGGESTED ANSWERS TO LIKELY QUESTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Q: Why Mistral specifically? Why not another model?
+A: Mistral 7B has a good balance of speed and quality for its size.
+   It's fast enough to run on a CPU-only machine and produces
+   coherent structured JSON. Other models like LLaMA 3 or Gemma
+   could also be dropped in — Ollama supports them all.
+
+Q: Can the tool handle non-English form fields?
+A: Tesseract supports multiple languages, but the prompts are
+   currently written in English. Mistral can handle some multilingual
+   content, but it hasn't been tested for that use case specifically.
+
+Q: Is the output always accurate enough to use directly?
+A: Not always, and I wouldn't recommend it. The tool is a first
+   draft accelerator. It gets you 80% of the way there in seconds,
+   but a QA engineer should always review before finalising.
+
+Q: How long does generation take?
+A: On a typical laptop running Ollama, between 5 and 30 seconds
+   depending on the number of fields and the machine's CPU/RAM.
+   With a dedicated server or a GPU machine, this would be
+   significantly faster.
+
+Q: Could this be shared across the team?
+A: Yes — that's actually one of the future improvements. Deploying
+   it on a shared internal server with Docker and Gunicorn would
+   make it accessible to everyone in the team through their browser,
+   with no individual setup required.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TIMING SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Slide 1  — Title                     ~1 min
+Slide 2  — Agenda                    ~1 min
+Slide 3  — Problem Statement         ~2 min
+Slide 4  — Project Overview          ~2 min
+Slide 5  — Tech Stack                ~2 min
+Slide 6  — Architecture              ~2 min
+Slide 7  — Field Types               ~2.5 min
+Slide 8  — OCR Pipeline              ~2.5 min
+Slide 9  — Prompt Engineering        ~2.5 min
+Slide 10 — Hallucination Prevention  ~2 min
+Slide 11 — Excel Export              ~1.5 min
+Slide 12 — Demo Walkthrough          ~3 min
+Slide 13 — Limitations               ~2.5 min
+Slide 14 — Future Work               ~2.5 min
+Slide 15 — Summary                   ~1 min
+Slide 16 — Q&A                       remaining
+                                    ─────────
+                              TOTAL  ~30 min

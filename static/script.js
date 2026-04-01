@@ -90,10 +90,42 @@ if (uploadScreenshotsBtn && screenshotsInput) {
 
 if (uploadRequirementDocBtn && requirementDocInput) {
     uploadRequirementDocBtn.addEventListener('click', () => requirementDocInput.click());
-    requirementDocInput.addEventListener('change', () => {
+    requirementDocInput.addEventListener('change', async () => {
         if (!requirementDocFileName) return;
         const file = requirementDocInput.files && requirementDocInput.files[0];
-        requirementDocFileName.textContent = file ? file.name : 'No document selected';
+        if (!file) {
+            requirementDocFileName.textContent = 'No document selected';
+            return;
+        }
+
+        requirementDocFileName.textContent = `Extracting text from ${file.name}...`;
+        uploadRequirementDocBtn.disabled = true;
+        hideError();
+
+        const formData = new FormData();
+        formData.append('document', file);
+
+        try {
+            const response = await fetch('/upload-requirement', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to extract text from document');
+            }
+
+            requirementInput.value = data.text;
+            requirementDocFileName.textContent = `Loaded text from ${file.name}`;
+
+        } catch (error) {
+            showError(error.message);
+            requirementDocFileName.textContent = 'Failed to process document';
+        } finally {
+            uploadRequirementDocBtn.disabled = false;
+        }
     });
 }
 
