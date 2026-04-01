@@ -616,42 +616,6 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       SLIDE 7 — UI WALKTHROUGH
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="slide theme-dark" id="slide-7">
-    <div class="eyebrow">Section 4</div>
-    <h1 class="slide-title">4-Step User Interface</h1>
-    <div class="full-width" style="margin-top:32px; max-width:800px;">
-      <div class="step-pill">
-        <div class="num">1</div>
-        <div>
-          <strong>Define Custom Fields / Buttons</strong> — Add fields with a type (Text / Amount / Button) and a name. Check "Data Field" for text fields that drive other field population.
-        </div>
-      </div>
-      <div class="step-pill">
-        <div class="num">2</div>
-        <div>
-          <strong>Upload Screenshots (Optional)</strong> — Upload screenshots of any form. OCR extracts the text, Mistral identifies field labels and types, and auto-populates Step 1.
-        </div>
-      </div>
-      <div class="step-pill">
-        <div class="num">3</div>
-        <div>
-          <strong>Enter Requirement Text (Optional)</strong> — Plain English description of the feature. If only this is provided, 8–10 coverage test cases are generated. Also supports document upload (UI placeholder).
-        </div>
-      </div>
-      <div class="step-pill">
-        <div class="num">4</div>
-        <div>
-          <strong>Review &amp; Download</strong> — Test cases display as cards showing TC ID, Scenario, and Expected Result. Click "Download as Excel" to get a formatted <code>.xlsx</code> instantly.
-        </div>
-      </div>
-    </div>
-    <div class="highlight-box hb-blue" style="margin-top:20px; font-size:14px;">
-      At minimum, you need <strong>either</strong> a field or a requirement — not both. The tool works with any combination.
-    </div>
-  </div>
 
   <!-- ═══════════════════════════════════════════════════════════
        SLIDE 8 — FIELD TYPES
@@ -697,39 +661,6 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       SLIDE 9 — TEST CASE ANATOMY
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="slide theme-dark" id="slide-9">
-    <div class="eyebrow">Section 6</div>
-    <h1 class="slide-title">Anatomy of Every Generated Set</h1>
-    <div class="full-width" style="max-width:860px; margin-top:32px;">
-      <div class="step-pill" style="border-left-color:#a78bfa;">
-        <div class="num" style="background:#a78bfa; color:#1a1a2e;">★</div>
-        <div><strong>TC01 — Always First:</strong> "Verify whether spellings and grammar of the form are correct" — auto-injected at index 0, shifts all other IDs</div>
-      </div>
-      <div style="text-align:center; opacity:0.4; font-size:13px; margin:14px auto;">↓ LLM-generated TCs for each field (renumbered after grammar TC) ↓</div>
-      <div class="step-pill" style="border-left-color:#fbbf24;">
-        <div class="num" style="background:#fbbf24; color:#1a1a2e;">B</div>
-        <div><strong>Button TCs:</strong> One test case per button field — generated deterministically in Python, no LLM call needed</div>
-      </div>
-      <div class="step-pill" style="border-left-color:#34d399;">
-        <div class="num" style="background:#34d399; color:#1a1a2e;">S</div>
-        <div><strong>Last 3 — Always:</strong> Save validation TCs appended at the end of every set</div>
-      </div>
-      <div style="margin-top:20px;" class="cols-3">
-        <div style="background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); border-radius:10px; padding:14px; font-size:13px;">
-          <strong>TCn</strong><br>Save not allowed if required fields are empty
-        </div>
-        <div style="background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); border-radius:10px; padding:14px; font-size:13px;">
-          <strong>TCn+1</strong><br>Form highlights empty required fields when Save is pressed
-        </div>
-        <div style="background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); border-radius:10px; padding:14px; font-size:13px;">
-          <strong>TCn+2</strong><br>Save works when every required field is complete
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- ═══════════════════════════════════════════════════════════
        SLIDE 10 — SCREENSHOT OCR PIPELINE
@@ -883,61 +814,6 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       SLIDE 13 — JSON PARSING & ROBUSTNESS
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="slide theme-dark" id="slide-13">
-    <div class="eyebrow">Section 7</div>
-    <h1 class="slide-title">Robust JSON Extraction</h1>
-    <p class="slide-sub" style="margin-bottom:28px;">LLMs don't always return clean JSON — the backend handles messy responses gracefully.</p>
-    <div class="cols-2">
-      <div>
-        <div class="step-pill">
-          <div class="num">1</div>
-          <div>If the response contains <code>```json ... ```</code> markdown fences, strip them</div>
-        </div>
-        <div class="step-pill">
-          <div class="num">2</div>
-          <div>If it contains plain <code>``` ... ```</code> fences, strip those instead</div>
-        </div>
-        <div class="step-pill">
-          <div class="num">3</div>
-          <div>Find the first <code>{</code> and last <code>}</code> — extract just that JSON object regardless of surrounding text</div>
-        </div>
-        <div class="step-pill">
-          <div class="num">4</div>
-          <div>Parse with <code>json.loads()</code> and extract <code>test_cases</code> array</div>
-        </div>
-        <div class="step-pill">
-          <div class="num">5</div>
-          <div>If parsing fails, log the full raw response and return <code>[]</code> — never crash the server</div>
-        </div>
-      </div>
-      <div class="code-block">
-<span class="cmt"># Strip markdown fences</span>
-<span class="kw">if</span> <span class="str">'```json'</span> <span class="kw">in</span> text:
-    text = text.split(<span class="str">'```json'</span>)[<span class="num">1</span>]
-               .split(<span class="str">'```'</span>)[<span class="num">0</span>].strip()
-<span class="kw">elif</span> <span class="str">'```'</span> <span class="kw">in</span> text:
-    text = text.split(<span class="str">'```'</span>)[<span class="num">1</span>]
-               .split(<span class="str">'```'</span>)[<span class="num">0</span>].strip()
-
-<span class="cmt"># Find JSON boundaries</span>
-start = text.find(<span class="str">'{'</span>)
-end   = text.rfind(<span class="str">'}'</span>) + <span class="num">1</span>
-<span class="kw">if</span> start != -<span class="num">1</span> <span class="kw">and</span> end > start:
-    text = text[start:end]
-
-<span class="cmt"># Safe parse</span>
-<span class="kw">try</span>:
-    data = json.loads(text)
-    test_cases = data.get(<span class="str">'test_cases'</span>, [])
-<span class="kw">except</span> json.JSONDecodeError <span class="kw">as</span> e:
-    <span class="fn">print</span>(<span class="str">f"Parse failed: </span>{e}<span class="str">"</span>)
-    <span class="kw">return</span> []
-      </div>
-    </div>
-  </div>
 
   <!-- ═══════════════════════════════════════════════════════════
        SLIDE 14 — EXCEL EXPORT FORMAT
@@ -988,109 +864,7 @@ end   = text.rfind(<span class="str">'}'</span>) + <span class="num">1</span>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       SLIDE 15 — API ENDPOINTS
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="slide theme-dark" id="slide-15">
-    <div class="eyebrow">Section 10</div>
-    <h1 class="slide-title">API Endpoints</h1>
-    <div class="full-width" style="max-width:960px; margin-top:28px;">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Method</th>
-            <th>Route</th>
-            <th>Purpose</th>
-            <th>Payload</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span class="accent-pill pill-green" style="font-size:11px;">GET</span></td>
-            <td><code>/</code></td>
-            <td>Render the main HTML page via Jinja2</td>
-            <td>—</td>
-          </tr>
-          <tr>
-            <td><span class="accent-pill pill-blue" style="font-size:11px;">POST</span></td>
-            <td><code>/generate</code></td>
-            <td>Generate test cases from fields + requirement</td>
-            <td>JSON: <code>{requirement, custom_fields[]}</code></td>
-          </tr>
-          <tr>
-            <td><span class="accent-pill pill-blue" style="font-size:11px;">POST</span></td>
-            <td><code>/export</code></td>
-            <td>Create and stream the Excel file</td>
-            <td>JSON: <code>{test_cases[]}</code></td>
-          </tr>
-          <tr>
-            <td><span class="accent-pill pill-blue" style="font-size:11px;">POST</span></td>
-            <td><code>/extract-fields</code></td>
-            <td>OCR screenshots → identify form fields</td>
-            <td>multipart/form-data: <code>screenshots[]</code></td>
-          </tr>
-          <tr>
-            <td><span class="accent-pill pill-green" style="font-size:11px;">GET</span></td>
-            <td><code>/health</code></td>
-            <td>Check if Ollama is running</td>
-            <td>—</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="highlight-box hb-blue" style="margin-top:24px; font-size:14px;">
-      <strong>Validation:</strong> <code>/generate</code> returns HTTP 400 if neither fields nor requirement are provided. <code>/export</code> returns 400 if the test_cases array is empty. <code>/extract-fields</code> returns 400 if no files are attached.
-    </div>
-  </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       SLIDE 16 — FRONTEND ARCHITECTURE
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="slide theme-blue" id="slide-16">
-    <div class="eyebrow">Frontend Deep Dive</div>
-    <h1 class="slide-title">JavaScript Architecture</h1>
-    <div class="cols-2" style="margin-top:28px;">
-      <div>
-        <div class="info-card">
-          <h3>State Management (plain arrays)</h3>
-          <p style="margin-top:8px;"><code>customFields[]</code> — in-memory array of field objects <code>{id, type, name, is_data_field}</code></p>
-          <p style="margin-top:8px;"><code>currentTestCases[]</code> — stores the last API response for export</p>
-        </div>
-        <div class="info-card" style="margin-top:16px;">
-          <h3>Field Rendering (DOM re-render)</h3>
-          <p style="margin-top:8px;">Every change (add, type switch, name input, delete) triggers a full <strong>re-render</strong> of the field list via <code>renderFields()</code>. Clean and simple — no virtual DOM needed at this scale.</p>
-        </div>
-        <div class="info-card" style="margin-top:16px;">
-          <h3>Type-Driven Checkbox Visibility</h3>
-          <p style="margin-top:8px;">The "Data Field" checkbox <em>only renders</em> for fields with type="text". When switching to amount/button, the checkbox disappears and <code>is_data_field</code> flag is effectively ignored.</p>
-        </div>
-      </div>
-      <div>
-        <div class="info-card">
-          <h3>Key Event Handlers</h3>
-          <ul style="margin-top:8px;">
-            <li><code>addFieldBtn</code> → <code>addFieldEntry()</code></li>
-            <li><code>generateBtn</code> → <code>handleGenerate()</code></li>
-            <li><code>exportBtn</code> → <code>handleExport()</code></li>
-            <li><code>resetBtn</code> → <code>handleReset()</code></li>
-            <li><code>screenshotsInput.change</code> → OCR fetch</li>
-          </ul>
-        </div>
-        <div class="info-card" style="margin-top:16px;">
-          <h3>Loading / Error States</h3>
-          <ul style="margin-top:8px;">
-            <li><code>.hidden</code> CSS class toggled for spinner and error div</li>
-            <li>Button disabled during OCR to prevent double-submit</li>
-            <li>Errors shown inline — no modal/alert boxes</li>
-          </ul>
-        </div>
-        <div class="info-card" style="margin-top:16px;">
-          <h3>Excel Download (client-side)</h3>
-          <p style="margin-top:8px;">Response is converted to <code>Blob</code>, turned into an object URL, and a hidden <code>&lt;a&gt;</code> tag is programmatically clicked — no page navigation needed.</p>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- ═══════════════════════════════════════════════════════════
        SLIDE 17 — DEMO FLOW
@@ -1151,99 +925,6 @@ end   = text.rfind(<span class="str">'}'</span>) + <span class="num">1</span>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════
-       SLIDE 18 — REQUIREMENTS / SETUP
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="slide theme-green" id="slide-18">
-    <div class="eyebrow">Setup &amp; Prerequisites</div>
-    <h1 class="slide-title">Running the Project</h1>
-    <div class="cols-2" style="margin-top:28px;">
-      <div>
-        <div class="info-card">
-          <h3>Prerequisites</h3>
-          <ul style="margin-top:10px;">
-            <li>Python 3.8+</li>
-            <li>Tesseract OCR installed at default path</li>
-            <li>Ollama installed &amp; running (<code>ollama serve</code>)</li>
-            <li>Mistral model pulled: <code>ollama pull mistral</code></li>
-          </ul>
-        </div>
-        <div class="info-card" style="margin-top:16px;">
-          <h3>Python Dependencies (<code>requirements.txt</code>)</h3>
-          <ul style="margin-top:10px;">
-            <li>Flask 3.0.0</li>
-            <li>requests 2.32.5</li>
-            <li>openpyxl 3.1.5</li>
-            <li>python-dotenv 1.0.0</li>
-            <li>Pillow 11.0.0</li>
-            <li>pytesseract 0.3.13</li>
-          </ul>
-        </div>
-      </div>
-      <div class="code-block" style="font-size:13px; height:auto;">
-<span class="cmt"># 1. Clone / open project</span>
-cd DPMC_Project
-
-<span class="cmt"># 2. Install Python deps</span>
-pip install -r requirements.txt
-
-<span class="cmt"># 3. Pull Mistral (one-time)</span>
-ollama pull mistral
-
-<span class="cmt"># 4. Start Ollama (keep open)</span>
-ollama serve
-
-<span class="cmt"># 5. Start Flask app</span>
-python app.py
-
-<span class="cmt"># 6. Open browser</span>
-<span class="str">http://localhost:5000</span>
-
-<span class="cmt"># 7. Health check</span>
-<span class="str">http://localhost:5000/health</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════════
-       SLIDE 19 — STATS AT A GLANCE
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="slide theme-blue" id="slide-19">
-    <div class="eyebrow">By The Numbers</div>
-    <h1 class="slide-title">Project at a Glance</h1>
-    <div class="cols-4" style="margin-top:36px; text-align:center;">
-      <div class="stat-card">
-        <div class="stat-num">5</div>
-        <div class="stat-label">Source Files</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">5</div>
-        <div class="stat-label">API Endpoints</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">3</div>
-        <div class="stat-label">Field Types Supported</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">0</div>
-        <div class="stat-label">Cloud API Costs</div>
-      </div>
-    </div>
-    <div class="cols-3" style="margin-top:24px; text-align:center;">
-      <div class="stat-card">
-        <div class="stat-num">3</div>
-        <div class="stat-label">Standard Save TCs (always generated)</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">7</div>
-        <div class="stat-label">Excel Columns in Output</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">2</div>
-        <div class="stat-label">Hallucination Defence Layers</div>
-      </div>
-    </div>
-  </div>
-  <!-- ═══════════════════════════════════════════════════════════
        SLIDE 20 — CURRENT LIMITATIONS
   ═══════════════════════════════════════════════════════════════ -->
   <div class="slide theme-dark" id="slide-20">
@@ -1284,58 +965,25 @@ python app.py
     <h1 class="slide-title">Future Work &amp;<br><span>Improvements</span></h1>
     <div class="cols-2" style="margin-top:28px;">
       <div class="info-card">
-        <span class="card-icon">☁️</span>
-        <h3>Affordable Cloud API — Bypass Laptop Limits</h3>
-        <p><em>Addresses: hardware constraint &amp; cost barrier.</em><br>Integrate <strong>Groq API</strong> (free tier, extremely fast inference) or leverage an existing <strong>Azure OpenAI</strong> enterprise agreement the company may already hold. The AI runs on the provider's hardware — no GPU needed on any employee laptop — and individual test-case generations cost fractions of a cent, making it manageable even on a small internal budget.</p>
-      </div>
-      <div class="info-card">
         <span class="card-icon">👁️</span>
         <h3>Vision-Capable LLM (LLaVA)</h3>
-        <p><em>Addresses: unreliable OCR.</em><br>Replace the Tesseract OCR → Mistral text pipeline with a single <strong>LLaVA</strong> multimodal model call that reads the screenshot directly. No preprocessing, no garbled text — the model sees the UI exactly as the QA engineer does. LLaVA 1.6 7B can run on the same shared server, keeping the solution fully internal if needed.</p>
-      </div>
-      <div class="info-card">
-        <span class="card-icon">🖥️</span>
-        <h3>Shared Internal Server Deployment</h3>
-        <p><em>Addresses: hardware constraint on individual laptops.</em><br>Host Ollama and the LLM on a <strong>single shared team machine</strong> (even a mid-range workstation with an 8 GB GPU is sufficient for Mistral 7B). QA engineers access the tool via browser over the local network — no individual setup, no laptop GPU requirement, and the entire team shares one inference engine.</p>
-      </div>
-      <div class="info-card">
-        <span class="card-icon">✏️</span>
-        <h3>In-Browser Review &amp; Edit Workflow</h3>
-        <p><em>Addresses: mandatory manual review overhead.</em><br>Make generated test case cards <strong>directly editable in the browser</strong> — inline fields for scenario and expected result — so QA engineers can review and correct AI output in one structured step before downloading. Reduces the back-and-forth between the tool and Excel during the unavoidable review phase.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════════
-       SLIDE 22 — FUTURE WORK (CONTINUED)
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="slide theme-dark" id="slide-22">
-    <div class="eyebrow">Section 12 — Continued</div>
-    <h1 class="slide-title">Further <span>Enhancements</span></h1>
-    <div class="cols-2" style="margin-top:28px;">
-      <div class="info-card">
-        <span class="card-icon">🧹</span>
-        <h3>Smarter OCR Preprocessing (Short-Term Fix)</h3>
-        <p>While transitioning to LLaVA, improve the existing Tesseract pipeline immediately by adding <strong>adaptive binarisation (Otsu's method), deskewing, and 2× upscaling</strong> via OpenCV. This is a low-effort, zero-cost change that can improve OCR accuracy by 20–40% on typical UI screenshots without any model changes.</p>
+        <p>Replace the Tesseract → Mistral pipeline with a multimodal model such as <strong>LLaVA</strong> or <strong>Gemini Vision</strong> to read screenshots directly. This removes OCR preprocessing entirely — the model sees the UI exactly as the user does — improving accuracy on complex, stylised, or dark-themed interfaces that Tesseract struggles with.</p>
       </div>
       <div class="info-card">
         <span class="card-icon">🔁</span>
         <h3>Modification Excel Upload</h3>
-        <p>Complete the already-present UI placeholder: accept an existing test case Excel file, detect which fields have been <strong>added, removed, or renamed</strong> since the last run, and regenerate only the affected test cases — enabling incremental updates without regenerating everything from scratch each sprint.</p>
+        <p>Complete the already-present UI placeholder: accept an existing test case Excel file, detect which fields have been <strong>added, removed, or renamed</strong> since the last run, and regenerate only the affected test cases — enabling efficient incremental updates without starting over from scratch each sprint.</p>
       </div>
       <div class="info-card">
-        <span class="card-icon">🏷️</span>
-        <h3>Priority &amp; Severity Tagging</h3>
-        <p>Automatically assign <strong>P1/P2/P3 priority and High/Medium/Low severity</strong> labels to each generated test case. This helps QA teams instantly identify which test cases to execute first during regression cycles, reducing the triage effort that is currently done manually in Excel.</p>
+        <span class="card-icon">🧹</span>
+        <h3>Smarter OCR Preprocessing</h3>
+        <p>While transitioning to LLaVA, enhance the existing Tesseract pipeline with <strong>adaptive binarisation (Otsu's method) and deskewing</strong> via OpenCV. A low-effort, zero-cost improvement that can boost OCR accuracy by <strong>20–40%</strong> on typical UI screenshots without changing any models or architecture.</p>
       </div>
       <div class="info-card">
-        <span class="card-icon">📄</span>
-        <h3>Document Parsing (PDF / DOCX)</h3>
-        <p>Integrate <strong>PyMuPDF</strong> or <strong>python-docx</strong> to parse uploaded requirement documents and auto-populate the requirement text box. This eliminates the manual copy-paste step from spec sheets and is a straightforward backend addition using libraries already compatible with the existing Flask setup.</p>
+        <span class="card-icon">👤</span>
+        <h3>User Profiles &amp; History</h3>
+        <p>Introduce user accounts so each QA engineer can <strong>log in, save past generations, and revisit previous test case sets</strong> without re-entering fields. A personal history dashboard would show project name, date, field count, and a quick re-download link — turning the tool from a one-shot generator into a persistent QA workspace.</p>
       </div>
-    </div>
-    <div class="highlight-box hb-blue" style="margin-top:16px; font-size:14px;">
-      <strong>Deployment Path:</strong> Containerise with <strong>Docker</strong> and serve via <strong>Gunicorn + Nginx</strong> on the shared internal server — making the tool a stable, always-on resource for the whole QA team, not a per-laptop install.
     </div>
   </div>
   <!-- ═══════════════════════════════════════════════════════════
